@@ -326,6 +326,10 @@ class RecordEpisode(gym.Wrapper):
     def base_env(self) -> BaseEnv:
         return self.env.unwrapped
 
+    def render_human(self):
+        """Open or refresh the interactive GUI viewer. Delegates to BaseEnv (gymnasium >= 1.0 does not forward this)."""
+        return self.base_env.render_human()
+
     @property
     def save_video(self):
         if not self._save_video:

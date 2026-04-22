@@ -153,7 +153,7 @@ def solve(env: BaseEnv, debug=False, vis=False):
     last_checkpoint_state = None
     gripper_open = True
     def select_panda_hand():
-        viewer.select_entity(sapien_utils.get_obj_by_name(env.agent.robot.links, "panda_hand")._objs[0].entity)
+        viewer.select_entity(sapien_utils.get_obj_by_name(env.unwrapped.agent.robot.links, "panda_hand")._objs[0].entity)
     select_panda_hand()
     for plugin in viewer.plugins:
         if isinstance(plugin, sapien.utils.viewer.viewer.TransformWindow):
@@ -245,9 +245,5 @@ def solve(env: BaseEnv, debug=False, vis=False):
                 if result == -1: print("Plan failed")
                 else: print("Generated motion plan was too long. Try a closer sub-goal")
             execute_current_pose = False
-
-
-
-    return args
 if __name__ == "__main__":
     main(parse_args())

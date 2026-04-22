@@ -1,4 +1,8 @@
 import mplib
+import os
+import site
+import warnings
+
 import numpy as np
 import sapien
 import trimesh
@@ -6,6 +10,22 @@ import trimesh
 from mani_skill.agents.base_agent import BaseAgent
 from mani_skill.envs.sapien_env import BaseEnv
 from mani_skill.utils.structs.pose import to_sapien_pose
+
+
+def _warn_if_mplib_from_user_site() -> None:
+    """MPlib is C++-heavy; a copy in ~/.local can mismatch the env and segfault in ArticulatedModel."""
+    mroot = os.path.normpath(os.path.dirname(mplib.__file__))
+    u = site.getusersitepackages()
+    if u and mroot.startswith(os.path.normpath(str(u))):
+        warnings.warn(
+            "mplib is loaded from user site-packages (e.g. pip install --user), not the active "
+            "virtualenv/conda env. This often causes a segmentation fault when constructing "
+            "mplib.Planner. Fix: install into the env only: pip install 'mplib==0.1.1' ; "
+            "remove mplib from user site, or run with PYTHONNOUSERSITE=1 after installing mplib in the env. "
+            f"(mplib at {mroot})",
+            RuntimeWarning,
+            stacklevel=3,
+        )
 
 
 class BaseMotionPlanningSolver:
@@ -53,6 +73,7 @@ class BaseMotionPlanningSolver:
             self.base_env.render_human()
 
     def setup_planner(self):
+        _warn_if_mplib_from_user_site()
         move_group = self.MOVE_GROUP if hasattr(self, "MOVE_GROUP") else "eef"
         link_names = [link.get_name() for link in self.robot.get_links()]
         joint_names = [joint.get_name() for joint in self.robot.get_active_joints()]
